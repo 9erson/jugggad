@@ -1,8 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import url from 'url';
+import { fileURLToPath } from 'url';
 import isDev from 'electron-is-dev';
 import { startApiServer } from './apiServer.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow;
 
@@ -11,18 +14,15 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
   });
 
   const startUrl = isDev
-    ? 'http://localhost:3000'
-    : url.format({
-        pathname: path.join(__dirname, '../dist/index.html'),
-        protocol: 'file:',
-        slashes: true,
-      });
+    ? process.env.VITE_DEV_SERVER_URL
+    : `file://${path.join(__dirname, '../index.html')}`;
 
   mainWindow.loadURL(startUrl);
 
